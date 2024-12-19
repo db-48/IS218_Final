@@ -108,3 +108,17 @@ def test_user_base_url_invalid(url, user_base_data):
     user_base_data["profile_picture_url"] = url
     with pytest.raises(ValidationError):
         UserBase(**user_base_data)
+
+def test_user_update_valid(user_update_data, user_base_data):
+    user = UserBase(**user_base_data)
+
+    user_update = UserUpdate(**user_update_data)
+    user.email = user_update.email
+    user.first_name = user_update.first_name
+    user.last_name = user_update.last_name
+
+    assert user.email == user_update.email
+    assert user.first_name == user_update.first_name
+    assert user.last_name == user_update.last_name
+ 
+   
