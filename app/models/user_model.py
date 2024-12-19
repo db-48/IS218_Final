@@ -15,7 +15,7 @@ class UserRole(Enum):
     AUTHENTICATED = "AUTHENTICATED"
     MANAGER = "MANAGER"
     ADMIN = "ADMIN"
-
+    PROFESSIONAL = "PROFESSIONAL"
 class User(Base):
     """
     Represents a user within the application, corresponding to the 'users' table in the database.

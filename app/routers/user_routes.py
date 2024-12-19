@@ -33,6 +33,8 @@ from app.services.jwt_service import create_access_token
 from app.utils.link_generation import create_user_links, generate_pagination_links
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
+import logging
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
@@ -107,7 +109,18 @@ async def update_user(user_id: UUID, user_update: UserUpdate, request: Request, 
         updated_at=updated_user.updated_at,
         links=create_user_links(updated_user.id, request)
     )
-
+@router.put("/users/{user_id}/upgrade", response_model=UserResponse, name="upgrade_user", tags=["User Management Requires (Admin or Manager Roles)"])
+async def upgrade_user_to_professional(
+    user_id: UUID, 
+    db: AsyncSession = Depends(get_db), 
+    current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))
+):
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found or could not be upgraded"
+        )
+    return UserResponse.from_orm(user)
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, name="delete_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
@@ -245,3 +258,4 @@ async def verify_email(user_id: UUID, token: str, db: AsyncSession = Depends(get
     if await UserService.verify_email_with_token(db, user_id, token):
         return {"message": "Email verified successfully"}
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
