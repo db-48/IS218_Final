@@ -161,3 +161,16 @@ async def test_unlock_user_account(db_session, locked_user):
     assert unlocked, "The account should be unlocked"
     refreshed_user = await UserService.get_by_id(db_session, locked_user.id)
     assert not refreshed_user.is_locked, "The user should no longer be locked"
+
+async def test_upgrade_user_to_professional(db_session: AsyncSession, user: User, admin_user: User, manager_user: User):
+    # Ensure the user is in the 'AUTHENTICATED' role
+    assert user.role == UserRole.AUTHENTICATED, "User should initially have the AUTHENTICATED role"
+    
+    # Ensures the update happened
+    await db_session.refresh(user)
+    assert user.role == UserRole.PROFESSIONAL, "User should be upgraded to PROFESSIONAL role"
+
+    # Ensure a manager can be upgraded 
+    is_upgraded = await UserService.upgrade_to_professional(db_session, user.id, manager_user.role)
+    assert is_upgraded, "Manager should be able to upgrade the user to PROFESSIONAL"
+    
