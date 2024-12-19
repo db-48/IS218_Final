@@ -48,7 +48,7 @@ class UserUpdate(UserBase):
     profile_picture_url: Optional[str] = Field(None, example="https://example.com/profiles/john.jpg")
     linkedin_profile_url: Optional[str] =Field(None, example="https://linkedin.com/in/johndoe")
     github_profile_url: Optional[str] = Field(None, example="https://github.com/johndoe")
-    
+    role: Optional[str] = Field(None, example="AUTHENTICATED")
 
     @root_validator(pre=True)
     def check_at_least_one_value(cls, values):
@@ -83,3 +83,6 @@ class UserListResponse(BaseModel):
     total: int = Field(..., example=100)
     page: int = Field(..., example=1)
     size: int = Field(..., example=10)
+
+class RoleUpdate(BaseModel):
+    role: str
