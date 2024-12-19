@@ -191,3 +191,27 @@ class UserService:
             await session.commit()
             return True
         return False
+
+    @classmethod
+    async def authenticate_by_nickname_and_password(cls, session: AsyncSession, email: str, password: str) -> Optional[User]:
+        user = await cls.get_by_email(session, email)
+        if user and verify_password(password, user.hashed_password):
+            return user
+        return None
+    
+    @staticmethod
+    async def upgrade_to_professional(session: AsyncSession, user_id: UUID, current_user_role: str) -> bool:
+        if current_user_role not in ["ADMIN", "MANAGER"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only managers or admins can upgrade to PROFESSIONAL"
+            )
+
+        if user:
+            user.is_professional = True
+            user.professional_status_updated_at = datetime.utcnow()  # Optionally update the timestamp
+            session.add(user)
+            await session.commit()
+            return True
+
+        return False
