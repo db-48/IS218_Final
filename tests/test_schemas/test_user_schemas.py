@@ -120,5 +120,13 @@ def test_user_update_valid(user_update_data, user_base_data):
     assert user.email == user_update.email
     assert user.first_name == user_update.first_name
     assert user.last_name == user_update.last_name
- 
+
+def test_user_update_invalid_email(user_update_data, user_base_data):
+    user = UserBase(**user_base_data)
+    user_update_data["email"] = "invalid-email-format"
+    
    
+def test_user_update_invalid_url(user_update_data, user_base_data):
+    user = UserBase(**user_base_data)
+    user_update_data["profile_picture_url"] = "ftp://invalid-url.com/profile.jpg"
+    
