@@ -20,14 +20,15 @@ def validate_url(url: Optional[str]) -> Optional[str]:
 class UserBase(BaseModel):
     email: EmailStr = Field(..., example="john.doe@example.com")
     nickname: Optional[str] = Field(None, min_length=3, pattern=r'^[\w-]+$', example=generate_nickname())
-    first_name: Optional[str] = Field(None, example="John")
-    last_name: Optional[str] = Field(None, example="Doe")
+    first_name: Optional[str] = Field(None, example="John", max_length=100)
+    last_name: Optional[str] = Field(None, example="Doe", max_length=100)
     bio: Optional[str] = Field(None, example="Experienced software developer specializing in web applications.")
     profile_picture_url: Optional[str] = Field(None, example="https://example.com/profiles/john.jpg")
     linkedin_profile_url: Optional[str] =Field(None, example="https://linkedin.com/in/johndoe")
     github_profile_url: Optional[str] = Field(None, example="https://github.com/johndoe")
     role: UserRole
-
+    is_professional: Optional[bool] = Field(default=False, example=False)
+    professional_status_updated_at: Optional[datetime] = Field(None, example="2023-12-01T12:34:56.789Z")
     _validate_urls = validator('profile_picture_url', 'linkedin_profile_url', 'github_profile_url', pre=True, allow_reuse=True)(validate_url)
  
     class Config:
@@ -36,6 +37,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     email: EmailStr = Field(..., example="john.doe@example.com")
     password: str = Field(..., example="Secure*1234")
+    role: UserRole = Field(..., example="AUTHENTICATED")
 
 class UserUpdate(UserBase):
     email: Optional[EmailStr] = Field(None, example="john.doe@example.com")
@@ -46,7 +48,7 @@ class UserUpdate(UserBase):
     profile_picture_url: Optional[str] = Field(None, example="https://example.com/profiles/john.jpg")
     linkedin_profile_url: Optional[str] =Field(None, example="https://linkedin.com/in/johndoe")
     github_profile_url: Optional[str] = Field(None, example="https://github.com/johndoe")
-    role: Optional[str] = Field(None, example="AUTHENTICATED")
+    
 
     @root_validator(pre=True)
     def check_at_least_one_value(cls, values):
@@ -58,8 +60,7 @@ class UserResponse(UserBase):
     id: uuid.UUID = Field(..., example=uuid.uuid4())
     email: EmailStr = Field(..., example="john.doe@example.com")
     nickname: Optional[str] = Field(None, min_length=3, pattern=r'^[\w-]+$', example=generate_nickname())    
-    is_professional: Optional[bool] = Field(default=False, example=True)
-    role: UserRole
+   
 
 class LoginRequest(BaseModel):
     email: str = Field(..., example="john.doe@example.com")
@@ -77,6 +78,7 @@ class UserListResponse(BaseModel):
         "profile_picture_url": "https://example.com/profiles/john.jpg", 
         "linkedin_profile_url": "https://linkedin.com/in/johndoe", 
         "github_profile_url": "https://github.com/johndoe"
+        "is_professional": True, "professional_status_updated_at": "2023-12-01T12:34:56.789Z"
     }])
     total: int = Field(..., example=100)
     page: int = Field(..., example=1)
